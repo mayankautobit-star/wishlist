@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wishlist Cards</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .add-card {
+      margin-bottom: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 400px;
+    }
+
+    input, button {
+      padding: 8px;
+      font-size: 14px;
+      margin-bottom: 6px;
+      width: 100%;
+    }
+
+    button {
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+    }
+
+    .wishlist {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .wishlist li {
+      margin-bottom: 5px;
+    }
+
+    .open {
+      display: block;
+    }
+
+    .toggle-btn {
+      margin-top: 10px;
+      background: #28a745;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Wishlist Cards</h1>
+
+  <div class="add-card">
+    <input type="text" id="nameInput" placeholder="Person's name" />
+    <input type="text" class="wishInput" placeholder="Wishlist item 1" />
+    <input type="text" class="wishInput" placeholder="Wishlist item 2" />
+    <input type="text" class="wishInput" placeholder="Wishlist item 3" />
+    <input type="text" class="wishInput" placeholder="Wishlist item 4" />
+    <input type="text" class="wishInput" placeholder="Wishlist item 5" />
+    <button onclick="addCard()">Add Card</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <script>
+    function addCard() {
+      const name = document.getElementById('nameInput').value.trim();
+      const wishInputs = document.querySelectorAll('.wishInput');
+      const wishes = [];
+
+      wishInputs.forEach(input => {
+        wishes.push(input.value.trim() || '—');
+      });
+
+      if (!name) return alert('Please enter a name');
+
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      card.innerHTML = `
+        <h3>${name}</h3>
+        <button class="toggle-btn">Open Wishlist</button>
+        <ul class="wishlist">
+          ${wishes.map(w => `<li>${w}</li>`).join('')}
+        </ul>
+      `;
+
+      const button = card.querySelector('.toggle-btn');
+      const wishlist = card.querySelector('.wishlist');
+
+      button.addEventListener('click', () => {
+        wishlist.classList.toggle('open');
+        button.textContent = wishlist.classList.contains('open')
+          ? 'Close Wishlist'
+          : 'Open Wishlist';
+      });
+
+      document.getElementById('cards').appendChild(card);
+
+      document.getElementById('nameInput').value = '';
+      wishInputs.forEach(input => input.value = '');
+    }
+  </script>
+
+</body>
+</html>
