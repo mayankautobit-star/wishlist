@@ -93,43 +93,63 @@
   <div class="cards" id="cards"></div>
 
   <script>
+    let cardsData = JSON.parse(localStorage.getItem('wishlistCards')) || [];
+
+    function saveToStorage() {
+      localStorage.setItem('wishlistCards', JSON.stringify(cardsData));
+    }
+
+    function renderCards() {
+      const cardsContainer = document.getElementById('cards');
+      cardsContainer.innerHTML = '';
+
+      cardsData.forEach(cardData => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.innerHTML = `
+          <h3>${cardData.name}</h3>
+          <button class="toggle-btn">Open Wishlist</button>
+          <ul class="wishlist">
+            ${cardData.wishes.map(w => `<li>${w}</li>`).join('')}
+          </ul>
+        `;
+
+        const button = card.querySelector('.toggle-btn');
+        const wishlist = card.querySelector('.wishlist');
+
+        button.addEventListener('click', () => {
+          wishlist.classList.toggle('open');
+          button.textContent = wishlist.classList.contains('open')
+            ? 'Close Wishlist'
+            : 'Open Wishlist';
+        });
+
+        cardsContainer.appendChild(card);
+      });
+    }
+
     function addCard() {
       const name = document.getElementById('nameInput').value.trim();
       const wishInputs = document.querySelectorAll('.wishInput');
       const wishes = [];
 
+      if (!name) return alert('Please enter a name');
+
       wishInputs.forEach(input => {
         wishes.push(input.value.trim() || '—');
       });
 
-      if (!name) return alert('Please enter a name');
-
-      const card = document.createElement('div');
-      card.className = 'card';
-
-      card.innerHTML = `
-        <h3>${name}</h3>
-        <button class="toggle-btn">Open Wishlist</button>
-        <ul class="wishlist">
-          ${wishes.map(w => `<li>${w}</li>`).join('')}
-        </ul>
-      `;
-
-      const button = card.querySelector('.toggle-btn');
-      const wishlist = card.querySelector('.wishlist');
-
-      button.addEventListener('click', () => {
-        wishlist.classList.toggle('open');
-        button.textContent = wishlist.classList.contains('open')
-          ? 'Close Wishlist'
-          : 'Open Wishlist';
-      });
-
-      document.getElementById('cards').appendChild(card);
+      cardsData.push({ name, wishes });
+      saveToStorage();
+      renderCards();
 
       document.getElementById('nameInput').value = '';
       wishInputs.forEach(input => input.value = '');
     }
+
+    // Load saved cards on page refresh
+    renderCards();
   </script>
 
 </body>
