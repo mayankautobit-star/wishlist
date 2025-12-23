@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wishlist Cards</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+
+    h1 { margin-bottom: 10px; }
+
+    .add-card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 400px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .cards {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .wishlist { display: none; margin-top: 10px; }
+    .wishlist.open { display: block; }
+
+    .toggle-btn {
+      margin-top: 10px;
+      background: #28a745;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Wishlist Cards</h1>
+
+  <div class="add-card">
+    <input id="nameInput" placeholder="Person's name" />
+    <input class="wishInput" placeholder="Wishlist item 1" />
+    <input class="wishInput" placeholder="Wishlist item 2" />
+    <input class="wishInput" placeholder="Wishlist item 3" />
+    <input class="wishInput" placeholder="Wishlist item 4" />
+    <input class="wishInput" placeholder="Wishlist item 5" />
+    <button onclick="addCard()">Add Card</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <script>
+    const cardsDiv = document.getElementById('cards');
+
+    async function loadCards() {
+      const res = await fetch('/api/cards');
+      const data = await res.json();
+      renderCards(data);
+    }
+
+    function renderCards(cards) {
+      cardsDiv.innerHTML = '';
+      cards.forEach(card => {
+        const div = document.createElement('div');
+        div.className = 'card';
+
+        div.innerHTML = `
+          <h3>${card.name}</h3>
+          <button class="toggle-btn">Open Wishlist</button>
+          <ul class="wishlist">
+            ${card.wishes.map(w => `<li>${w}</li>`).join('')}
+          </ul>
+        `;
+
+        const btn = div.querySelector('button');
+        const list = div.querySelector('.wishlist');
+
+        btn.onclick = () => {
+          list.classList.toggle('open');
+          btn.textContent = list.classList.contains('open')
+            ? 'Close Wishlist'
+            : 'Open Wishlist';
+        };
+
+        cardsDiv.appendChild(div);
+      });
+    }
+
+    async function addCard() {
+      const name = document.getElementById('nameInput').value.trim();
+      const wishes = [...document.querySelectorAll('.wishInput')]
+        .map(i => i.value.trim() || '—');
+
+      if (!name) return alert('Please enter a name');
+
+      await fetch('/api/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, wishes })
+      });
+
+      document.getElementById('nameInput').value = '';
+      document.querySelectorAll('.wishInput').forEach(i => i.value = '');
+
+      loadCards();
+    }
+
+    loadCards();
+  </script>
+
+</body>
+</html>
